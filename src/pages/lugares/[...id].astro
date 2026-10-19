@@ -3,7 +3,7 @@ import { getCollection, render } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import Mapa from '../../components/Mapa.astro';
-import { type Lugar, statusLabel, prioridadeLabel, formatarData, estrelas, slugify } from '../../lib';
+import { type Lugar, statusLabel, prioridadeLabel, formatarData, estrelas, slugify, url } from '../../lib';
 
 export async function getStaticPaths() {
   const lugares = await getCollection('lugares');
@@ -20,7 +20,7 @@ const { Content } = await render(lugar);
 ---
 
 <Base title={d.nome} description={`${d.tipo} em ${d.cidade}, ${d.pais}`}>
-  <p class="muted"><a href="/">← Voltar</a></p>
+  <p class="muted"><a href={url("/")}>← Voltar</a></p>
 
   <h1>{d.nome}</h1>
   <p class="muted sub">
@@ -57,7 +57,7 @@ const { Content } = await render(lugar);
       d.tags.length > 0 && (
         <div>
           <dt>Tags</dt>
-          <dd class="tags">{d.tags.map((t) => <a class="tag" href={`/tags/${slugify(t)}/`}>{t}</a>)}</dd>
+          <dd class="tags">{d.tags.map((t) => <a class="tag" href={url(`/tags/${slugify(t)}/`)}>{t}</a>)}</dd>
         </div>
       )
     }

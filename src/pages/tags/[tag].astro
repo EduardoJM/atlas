@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import LugarCard from '../../components/LugarCard.astro';
-import { type Lugar, slugify } from '../../lib';
+import { type Lugar, slugify, url } from '../../lib';
 
 export async function getStaticPaths() {
   const lugares = await getCollection('lugares');
@@ -26,7 +26,7 @@ const { nome, lugares } = Astro.props;
 ---
 
 <Base title={`#${nome}`}>
-  <p class="muted"><a href="/">← Voltar</a></p>
+  <p class="muted"><a href={url("/")}>← Voltar</a></p>
   <h1>#{nome}</h1>
   <p class="muted">{lugares.length} {lugares.length === 1 ? 'lugar' : 'lugares'}</p>
   <ul class="lista">

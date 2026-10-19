@@ -25,6 +25,7 @@ const pontos = lugares
 
 <script>
   import L from 'leaflet';
+  import { url } from '../lib';
   import 'leaflet/dist/leaflet.css';
 
   type Ponto = { id: string; nome: string; status: string; coords: [number, number] };
@@ -47,7 +48,7 @@ const pontos = lugares
           fillOpacity: 0.9,
           fillColor: css.getPropertyValue(`--${p.status}`).trim() || '#2f6f5e',
         })
-          .bindPopup(`<a href="/lugares/${p.id}/">${p.nome}</a>`)
+          .bindPopup(`<a href="${url(`/lugares/${p.id}/`)}">${p.nome}</a>`)
           .addTo(map),
       );
 

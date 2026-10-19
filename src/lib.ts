@@ -25,3 +25,7 @@ export function slugify(s: string) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 }
+
+export function url(path: string) {
+  return import.meta.env.BASE_URL.replace(/\/$/, '') + path;
+}

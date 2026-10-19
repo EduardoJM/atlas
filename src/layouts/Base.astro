@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { url } from '../lib';
 
 interface Props {
   title?: string;
@@ -22,7 +23,7 @@ const fullTitle = title ? `${title} · Atlas` : 'Atlas';
   <body>
     <header class="site">
       <div class="container">
-        <a class="brand" href="/">🗺️ Atlas</a>
+        <a class="brand" href={url('/')}>🗺️ Atlas</a>
       </div>
     </header>
     <main class="container">

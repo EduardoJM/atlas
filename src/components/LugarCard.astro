@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import { type Lugar, statusLabel, prioridadeLabel, formatarData, estrelas, slugify } from '../lib';
+import { type Lugar, statusLabel, prioridadeLabel, formatarData, estrelas, slugify, url } from '../lib';
 
 interface Props {
   lugar: Lugar;
@@ -14,13 +14,13 @@ const capa = d.imagens[0];
 <li class="card" data-status={d.status} data-tipo={d.tipo}>
   {
     capa && (
-      <a class="capa" href={`/lugares/${lugar.id}/`} tabindex="-1" aria-hidden="true">
+      <a class="capa" href={url(`/lugares/${lugar.id}/`)} tabindex="-1" aria-hidden="true">
         <Image src={capa.src} alt="" width={600} loading="lazy" />
       </a>
     )
   }
   <div class="top">
-    <a class="nome" href={`/lugares/${lugar.id}/`}>{d.nome}</a>
+    <a class="nome" href={url(`/lugares/${lugar.id}/`)}>{d.nome}</a>
     <span class={`badge ${d.status}`}>{statusLabel[d.status]}</span>
   </div>
   <div class="muted meta">
@@ -30,7 +30,7 @@ const capa = d.imagens[0];
   </div>
   <div class="bottom">
     {d.nota && <span class="stars" title={`Nota ${d.nota} de 5`}>{estrelas(d.nota)}</span>}
-    {d.tags.map((t) => <a class="tag" href={`/tags/${slugify(t)}/`}>{t}</a>)}
+    {d.tags.map((t) => <a class="tag" href={url(`/tags/${slugify(t)}/`)}>{t}</a>)}
   </div>
 </li>
 
