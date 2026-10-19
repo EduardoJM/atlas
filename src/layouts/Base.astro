@@ -1,0 +1,32 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description = 'Lugares que visitei e que quero visitar.' } = Astro.props;
+const fullTitle = title ? `${title} · Atlas` : 'Atlas';
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>" />
+    <title>{fullTitle}</title>
+  </head>
+  <body>
+    <header class="site">
+      <div class="container">
+        <a class="brand" href="/">🗺️ Atlas</a>
+      </div>
+    </header>
+    <main class="container">
+      <slot />
+    </main>
+  </body>
+</html>

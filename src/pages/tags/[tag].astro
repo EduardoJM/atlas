@@ -1,0 +1,45 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import LugarCard from '../../components/LugarCard.astro';
+import { type Lugar, slugify } from '../../lib';
+
+export async function getStaticPaths() {
+  const lugares = await getCollection('lugares');
+  const porTag = new Map<string, { nome: string; lugares: Lugar[] }>();
+  for (const lugar of lugares) {
+    for (const t of lugar.data.tags) {
+      const slug = slugify(t);
+      if (!porTag.has(slug)) porTag.set(slug, { nome: t, lugares: [] });
+      porTag.get(slug)!.lugares.push(lugar);
+    }
+  }
+  return [...porTag].map(([tag, props]) => ({ params: { tag }, props }));
+}
+
+interface Props {
+  nome: string;
+  lugares: Lugar[];
+}
+
+const { nome, lugares } = Astro.props;
+---
+
+<Base title={`#${nome}`}>
+  <p class="muted"><a href="/">← Voltar</a></p>
+  <h1>#{nome}</h1>
+  <p class="muted">{lugares.length} {lugares.length === 1 ? 'lugar' : 'lugares'}</p>
+  <ul class="lista">
+    {lugares.map((lugar) => <LugarCard lugar={lugar} />)}
+  </ul>
+</Base>
+
+<style>
+  .lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    padding: 0;
+    margin: 16px 0 0;
+  }
+</style>

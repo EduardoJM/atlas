@@ -1,0 +1,67 @@
+---
+import type { Lugar } from '../lib';
+
+interface Props {
+  lugares: Lugar[];
+  zoom?: number;
+}
+
+const { lugares, zoom } = Astro.props;
+const pontos = lugares
+  .filter((l) => l.data.coordenadas)
+  .map((l) => ({
+    id: l.id,
+    nome: l.data.nome,
+    status: l.data.status,
+    coords: l.data.coordenadas!,
+  }));
+---
+
+{
+  pontos.length > 0 && (
+    <atlas-mapa class="map" data-pontos={JSON.stringify(pontos)} data-zoom={zoom} />
+  )
+}
+
+<script>
+  import L from 'leaflet';
+  import 'leaflet/dist/leaflet.css';
+
+  type Ponto = { id: string; nome: string; status: string; coords: [number, number] };
+
+  class AtlasMapa extends HTMLElement {
+    connectedCallback() {
+      const pontos: Ponto[] = JSON.parse(this.dataset.pontos ?? '[]');
+      const map = L.map(this, { scrollWheelZoom: false });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap',
+        maxZoom: 19,
+      }).addTo(map);
+
+      const css = getComputedStyle(document.documentElement);
+      const markers = pontos.map((p) =>
+        L.circleMarker(p.coords, {
+          radius: 8,
+          weight: 2,
+          color: '#fff',
+          fillOpacity: 0.9,
+          fillColor: css.getPropertyValue(`--${p.status}`).trim() || '#2f6f5e',
+        })
+          .bindPopup(`<a href="/lugares/${p.id}/">${p.nome}</a>`)
+          .addTo(map),
+      );
+
+      if (markers.length === 1 || this.dataset.zoom) {
+        map.setView(pontos[0].coords, Number(this.dataset.zoom) || 14);
+      } else {
+        map.fitBounds(L.featureGroup(markers).getBounds(), { padding: [40, 40], maxZoom: 14 });
+      }
+    }
+  }
+
+  customElements.define('atlas-mapa', AtlasMapa);
+</script>
+
+<style>
+  atlas-mapa { display: block; }
+</style>

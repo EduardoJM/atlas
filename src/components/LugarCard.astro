@@ -1,0 +1,79 @@
+---
+import { Image } from 'astro:assets';
+import { type Lugar, statusLabel, prioridadeLabel, formatarData, estrelas, slugify } from '../lib';
+
+interface Props {
+  lugar: Lugar;
+}
+
+const { lugar } = Astro.props;
+const d = lugar.data;
+const capa = d.imagens[0];
+---
+
+<li class="card" data-status={d.status} data-tipo={d.tipo}>
+  {
+    capa && (
+      <a class="capa" href={`/lugares/${lugar.id}/`} tabindex="-1" aria-hidden="true">
+        <Image src={capa.src} alt="" width={600} loading="lazy" />
+      </a>
+    )
+  }
+  <div class="top">
+    <a class="nome" href={`/lugares/${lugar.id}/`}>{d.nome}</a>
+    <span class={`badge ${d.status}`}>{statusLabel[d.status]}</span>
+  </div>
+  <div class="muted meta">
+    <span class="tipo">{d.tipo}</span> · {d.cidade}, {d.pais}
+    {d.status === 'visitado' && d.data_visita && <> · {formatarData(d.data_visita)}</>}
+    {d.status === 'quero-ir' && d.prioridade && <> · prioridade {prioridadeLabel[d.prioridade].toLowerCase()}</>}
+  </div>
+  <div class="bottom">
+    {d.nota && <span class="stars" title={`Nota ${d.nota} de 5`}>{estrelas(d.nota)}</span>}
+    {d.tags.map((t) => <a class="tag" href={`/tags/${slugify(t)}/`}>{t}</a>)}
+  </div>
+</li>
+
+<style>
+  .card {
+    list-style: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: grid;
+    gap: 6px;
+  }
+  .capa {
+    display: block;
+    margin: -14px -16px 4px;
+  }
+  .capa img {
+    display: block;
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 12px;
+  }
+  .nome {
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .nome:hover { text-decoration: underline; }
+  .meta { font-size: 0.9rem; }
+  .tipo { text-transform: capitalize; }
+  .bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+  .bottom:empty { display: none; }
+</style>

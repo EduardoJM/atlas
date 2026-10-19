@@ -1,0 +1,102 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import LugarCard from '../components/LugarCard.astro';
+import Mapa from '../components/Mapa.astro';
+
+const ordemPrioridade = { alta: 0, media: 1, baixa: 2 };
+
+const lugares = (await getCollection('lugares')).sort((a, b) => {
+  if (a.data.status !== b.data.status) return a.data.status === 'visitado' ? -1 : 1;
+  if (a.data.status === 'visitado') {
+    return (b.data.data_visita?.getTime() ?? 0) - (a.data.data_visita?.getTime() ?? 0);
+  }
+  const pa = a.data.prioridade ? ordemPrioridade[a.data.prioridade] : 3;
+  const pb = b.data.prioridade ? ordemPrioridade[b.data.prioridade] : 3;
+  return pa - pb || a.data.nome.localeCompare(b.data.nome, 'pt-BR');
+});
+
+const visitados = lugares.filter((l) => l.data.status === 'visitado').length;
+const queroIr = lugares.length - visitados;
+const paises = new Set(lugares.map((l) => l.data.pais)).size;
+const plural = (n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`;
+const resumo = [
+  plural(lugares.length, 'lugar', 'lugares'),
+  plural(visitados, 'visitado', 'visitados'),
+  `${queroIr} na lista de desejos`,
+  plural(paises, 'país', 'países'),
+].join(' · ');
+const tipos = [...new Set(lugares.map((l) => l.data.tipo))].sort();
+---
+
+<Base>
+  <h1>Atlas</h1>
+  <p class="muted">{resumo}</p>
+
+  <Mapa lugares={lugares} />
+
+  <div class="filtros" role="group" aria-label="Filtros">
+    <select id="f-status" aria-label="Status">
+      <option value="">Todos os status</option>
+      <option value="visitado">Visitados</option>
+      <option value="quero-ir">Quero ir</option>
+    </select>
+    <select id="f-tipo" aria-label="Tipo">
+      <option value="">Todos os tipos</option>
+      {tipos.map((t) => <option value={t}>{t}</option>)}
+    </select>
+  </div>
+
+  <ul class="lista" id="lista">
+    {lugares.map((lugar) => <LugarCard lugar={lugar} />)}
+  </ul>
+  <p class="muted vazio" id="vazio" hidden>Nenhum lugar com esses filtros.</p>
+</Base>
+
+<script>
+  const status = document.querySelector<HTMLSelectElement>('#f-status')!;
+  const tipo = document.querySelector<HTMLSelectElement>('#f-tipo')!;
+  const cards = document.querySelectorAll<HTMLElement>('#lista > li');
+  const vazio = document.querySelector<HTMLElement>('#vazio')!;
+
+  function aplicar() {
+    let visiveis = 0;
+    cards.forEach((c) => {
+      const ok =
+        (!status.value || c.dataset.status === status.value) &&
+        (!tipo.value || c.dataset.tipo === tipo.value);
+      c.hidden = !ok;
+      if (ok) visiveis++;
+    });
+    vazio.hidden = visiveis > 0;
+  }
+
+  status.addEventListener('change', aplicar);
+  tipo.addEventListener('change', aplicar);
+</script>
+
+<style>
+  .filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 24px 0 12px;
+  }
+  select {
+    font: inherit;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    text-transform: capitalize;
+  }
+  .lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    padding: 0;
+    margin: 0;
+  }
+  .lista > :global(li[hidden]) { display: none; }
+</style>
