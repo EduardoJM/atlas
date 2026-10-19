@@ -9,4 +9,7 @@ data_visita: 2025-07-12
 nota: 5 # 1 a 5
 prioridade: # alta | media | baixa (só para quero-ir)
 tags: [ciência]
+imagens:
+  - { src: ./fotos/museu-de-zoologia-da-usp/1.jpg, legenda: Fachada do prédio }
+  - { src: ./fotos/museu-de-zoologia-da-usp/2.jpg, legenda: Exposição de esqueletos }
 ---

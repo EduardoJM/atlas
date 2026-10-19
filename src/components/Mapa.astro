@@ -1,4 +1,5 @@
 ---
+import { getImage } from 'astro:assets';
 import type { Lugar } from '../lib';
 
 interface Props {
@@ -7,14 +8,20 @@ interface Props {
 }
 
 const { lugares, zoom } = Astro.props;
-const pontos = lugares
-  .filter((l) => l.data.coordenadas)
-  .map((l) => ({
-    id: l.id,
-    nome: l.data.nome,
-    status: l.data.status,
-    coords: l.data.coordenadas!,
-  }));
+const pontos = await Promise.all(
+  lugares
+    .filter((l) => l.data.coordenadas)
+    .map(async (l) => {
+      const capa = l.data.imagens[0];
+      return {
+        id: l.id,
+        nome: l.data.nome,
+        status: l.data.status,
+        coords: l.data.coordenadas!,
+        capa: capa ? (await getImage({ src: capa.src, width: 400 })).src : null,
+      };
+    }),
+);
 ---
 
 {
@@ -28,7 +35,7 @@ const pontos = lugares
   import { url } from '../lib';
   import 'leaflet/dist/leaflet.css';
 
-  type Ponto = { id: string; nome: string; status: string; coords: [number, number] };
+  type Ponto = { id: string; nome: string; status: string; coords: [number, number]; capa: string | null };
 
   class AtlasMapa extends HTMLElement {
     connectedCallback() {
@@ -48,7 +55,11 @@ const pontos = lugares
           fillOpacity: 0.9,
           fillColor: css.getPropertyValue(`--${p.status}`).trim() || '#2f6f5e',
         })
-          .bindPopup(`<a href="${url(`/lugares/${p.id}/`)}">${p.nome}</a>`)
+          .bindPopup(
+            `<a class="popup" href="${url(`/lugares/${p.id}/`)}">` +
+              (p.capa ? `<img src="${p.capa}" alt="" />` : '') +
+              `<span>${p.nome}</span></a>`,
+          )
           .addTo(map),
       );
 
@@ -65,4 +76,13 @@ const pontos = lugares
 
 <style>
   atlas-mapa { display: block; }
+  atlas-mapa :global(.popup) { display: block; width: 200px; }
+  atlas-mapa :global(.popup img) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 6px;
+  }
 </style>

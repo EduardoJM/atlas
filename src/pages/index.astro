@@ -29,28 +29,38 @@ const resumo = [
 const tipos = [...new Set(lugares.map((l) => l.data.tipo))].sort();
 ---
 
-<Base>
-  <h1>Atlas</h1>
-  <p class="muted">{resumo}</p>
+<Base telaCheia>
+  <div class="colunas">
+    <div class="lado">
+      <div class="topo">
+        <h1>Atlas</h1>
+        <p class="muted">{resumo}</p>
+      </div>
 
-  <Mapa lugares={lugares} />
+      <section class="lugares">
+        <div class="filtros" role="group" aria-label="Filtros">
+          <select id="f-status" aria-label="Status">
+            <option value="">Todos os status</option>
+            <option value="visitado">Visitados</option>
+            <option value="quero-ir">Quero ir</option>
+          </select>
+          <select id="f-tipo" aria-label="Tipo">
+            <option value="">Todos os tipos</option>
+            {tipos.map((t) => <option value={t}>{t}</option>)}
+          </select>
+        </div>
 
-  <div class="filtros" role="group" aria-label="Filtros">
-    <select id="f-status" aria-label="Status">
-      <option value="">Todos os status</option>
-      <option value="visitado">Visitados</option>
-      <option value="quero-ir">Quero ir</option>
-    </select>
-    <select id="f-tipo" aria-label="Tipo">
-      <option value="">Todos os tipos</option>
-      {tipos.map((t) => <option value={t}>{t}</option>)}
-    </select>
+        <ul class="lista" id="lista">
+          {lugares.map((lugar) => <LugarCard lugar={lugar} />)}
+        </ul>
+        <p class="muted vazio" id="vazio" hidden>Nenhum lugar com esses filtros.</p>
+      </section>
+    </div>
+
+    <aside class="mapa">
+      <Mapa lugares={lugares} />
+    </aside>
   </div>
-
-  <ul class="lista" id="lista">
-    {lugares.map((lugar) => <LugarCard lugar={lugar} />)}
-  </ul>
-  <p class="muted vazio" id="vazio" hidden>Nenhum lugar com esses filtros.</p>
 </Base>
 
 <script>
@@ -76,6 +86,41 @@ const tipos = [...new Set(lugares.map((l) => l.data.tipo))].sort();
 </script>
 
 <style>
+  .colunas {
+    display: grid;
+    grid-template-columns: 40% minmax(0, 1fr);
+    height: 100%;
+  }
+  /* só a coluna dos cards rola; o mapa ocupa toda a altura disponível */
+  .lado {
+    overflow-y: auto;
+    padding: 24px 16px 48px;
+  }
+  .topo p { margin: 0; }
+  .mapa {
+    height: 100%;
+    border-left: 1px solid var(--border);
+  }
+  .mapa :global(.map) {
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+  }
+
+  /* no celular volta ao scroll normal da página: título, mapa e cards */
+  @media (max-width: 860px) {
+    :global(body.tela-cheia) { height: auto; overflow: visible; }
+    .colunas {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: 'topo' 'mapa' 'lugares';
+      height: auto;
+    }
+    .lado { display: contents; }
+    .topo { grid-area: topo; padding: 24px 16px 0; }
+    .lugares { grid-area: lugares; padding: 0 16px 48px; }
+    .mapa { grid-area: mapa; height: 380px; margin-top: 24px; border-left: 0; }
+  }
+
   .filtros {
     display: flex;
     flex-wrap: wrap;
@@ -93,7 +138,7 @@ const tipos = [...new Set(lugares.map((l) => l.data.tipo))].sort();
   }
   .lista {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
     gap: 12px;
     padding: 0;
     margin: 0;

@@ -5,9 +5,11 @@ import { url } from '../lib';
 interface Props {
   title?: string;
   description?: string;
+  /** ocupa a tela inteira, sem scroll na página (cada página cuida do próprio scroll) */
+  telaCheia?: boolean;
 }
 
-const { title, description = 'Lugares que visitei e que quero visitar.' } = Astro.props;
+const { title, description = 'Lugares que visitei e que quero visitar.', telaCheia = false } = Astro.props;
 const fullTitle = title ? `${title} · Atlas` : 'Atlas';
 ---
 
@@ -20,13 +22,13 @@ const fullTitle = title ? `${title} · Atlas` : 'Atlas';
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>" />
     <title>{fullTitle}</title>
   </head>
-  <body>
+  <body class:list={{ 'tela-cheia': telaCheia }}>
     <header class="site">
-      <div class="container">
+      <div class:list={['container', { cheio: telaCheia }]}>
         <a class="brand" href={url('/')}>🗺️ Atlas</a>
       </div>
     </header>
-    <main class="container">
+    <main class:list={{ container: !telaCheia }}>
       <slot />
     </main>
   </body>
